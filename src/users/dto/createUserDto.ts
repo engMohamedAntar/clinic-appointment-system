@@ -1,6 +1,6 @@
 //createUserDto.ts
 import { IsEmail, IsString, Length, IsEnum } from 'class-validator';
-import { UserRole } from '../users.constants';
+import { UserRole } from '../users.constants.js';
 
 export class CreateUserDto {
   @IsString({message: 'name must be a string'})

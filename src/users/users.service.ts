@@ -1,9 +1,9 @@
 //users.service.ts
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma.service';
-import { CreateUserDto } from './dto/createUserDto';
+import { PrismaService } from '../prisma.service.js';
+import { CreateUserDto } from './dto/createUserDto.js';
 import * as bcrypt from 'bcrypt';
-import { UpdateUserDto } from './dto/updateUserDto';
+import { UpdateUserDto } from './dto/updateUserDto.js';
 
 @Injectable()
 export class UsersService {

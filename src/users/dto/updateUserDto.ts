@@ -1,6 +1,6 @@
 //createUserDto.ts
 import { IsEmail, IsEnum, IsOptional, IsString, Length } from 'class-validator';
-import { UserRole } from '../users.constants';
+import { UserRole } from '../users.constants.js';
 
 
 export class UpdateUserDto {

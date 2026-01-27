@@ -1,4 +1,5 @@
 {
+  "type": "module",
   "name": "clinic-appointment-system",
   "version": "0.0.1",
   "description": "",
