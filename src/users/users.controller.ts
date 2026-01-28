@@ -5,7 +5,7 @@ import { CreateUserDto } from './dto/createUserDto.js';
 import { UpdateUserDto } from './dto/updateUserDto.js';
 
 
-@Controller('users')
+@Controller('api/users')
 export class UsersController {
     constructor(private usersService: UsersService) {}
     @Post('/')

@@ -1,5 +1,5 @@
 //users.service.ts
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service.js';
 import { CreateUserDto } from './dto/createUserDto.js';
 import * as bcrypt from 'bcrypt';
@@ -22,7 +22,10 @@ export class UsersService {
   }
 
   async getAllUsers() {
-    return await this.prisma.user.findMany();
+    const users= await this.prisma.user.findMany();
+    if(users.length===0)
+      throw new NotFoundException('No users found');
+    return users;
   }
 
   async updateUser(userId: number, body: UpdateUserDto) {

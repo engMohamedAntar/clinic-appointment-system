@@ -13,7 +13,7 @@ datasource db {
   provider = "postgresql"
 }
 
- enum UserRole {
+enum UserRole {
   ADMIN
   DOCTOR
   PATIENT
@@ -21,9 +21,9 @@ datasource db {
 
 model User {
   id           Int      @id @default(autoincrement())
-  name          String @default("")
+  name         String   @default("")
   email        String   @unique
-  passwordHash  String @default("")
+  passwordHash String   @default("")
   role         UserRole @default(PATIENT)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @default(now()) @updatedAt

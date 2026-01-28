@@ -1,8 +1,15 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { UsersService } from '../users/users.service.js';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { RegisterDto } from './dto/registerDto.js';
+import { PrismaService } from '../prisma.service.js';
+import { UserRole } from '../generated/prisma/browser.js';
 
 @Injectable()
 export class AuthService {
@@ -10,6 +17,7 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
     private configService: ConfigService,
+    private prismaService: PrismaService,
   ) {}
 
   async generateTokens(user) {
@@ -36,6 +44,39 @@ export class AuthService {
     };
   }
 
+  async register(body: RegisterDto) {
+    // check if user with email already exists
+    const existingUser = await this.usersService.findOne(body.email);
+    if (existingUser) {
+      throw new BadRequestException('User with this email already exists');
+    }
+
+    // compare password and confirmPassword
+    if (body.password !== body.passwordConfirm) {
+      throw new BadRequestException('Passwords do not match');
+    }
+
+    // create new user
+    const newUser = await this.prismaService.user.create({
+      data: {
+        name: body.name,
+        email: body.email,
+        role: UserRole.PATIENT,
+        passwordHash: await bcrypt.hash(body.password, 10),
+      },
+    });
+
+    // generate jwt and refresh-jwt tokens.
+    const { accessToken, refreshToken } = await this.generateTokens(newUser);
+
+    // return user, jwt and refresh-jwt tokens.
+    return {
+      user: newUser,
+      accessToken,
+      refreshToken,
+    };
+  }
+
   async validateUser(email: string, pass: string): Promise<any> {
     const user = await this.usersService.findOne(email);
 
@@ -50,5 +91,4 @@ export class AuthService {
     }
     return null;
   }
-  
 }
