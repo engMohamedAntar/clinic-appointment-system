@@ -1,6 +1,8 @@
 ###
 GET http://localhost:3000/api/users
 
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjE1LCJlbWFpbCI6ImFkbWluQGdtYWlsLmNvbSIsImlhdCI6MTc2OTY2MzY3MSwiZXhwIjoxNzY5NjY3MjcxfQ.uWOXEw3D8YAvSFG-h1kBczGnC-4axHmI4Qgb7oGzQwU
+
 ###
 POST http://localhost:3000/api/users
 Content-Type: application/json
