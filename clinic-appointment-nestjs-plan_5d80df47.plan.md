@@ -113,7 +113,7 @@ flowchart LR
 ### 4. Core domain models & basic CRUD
 
 - **4.1. Patients & doctors modules**
-  - `patients` module:
+  - `patients` module:V
     - Model fields: `id`, `userId`, `fullName`, `dateOfBirth`, `phone`, `address`, optional `notes`.
     - Endpoints: create/update profile (patient + admin), get by id, search/list.
   - `doctors` module:

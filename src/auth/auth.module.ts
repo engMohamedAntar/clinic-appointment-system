@@ -9,6 +9,7 @@ import { UsersService } from '../users/users.service.js';
 import { PrismaService } from '../prisma.service.js';
 import { AuthController } from './auth.controller.js';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { RefreshJwtStrategy } from './strategies/refresh.strategy.js';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     AuthService,
     JwtStrategy,
     LocalStrategy,
+    RefreshJwtStrategy,
     UsersService,
     PrismaService,
   ],

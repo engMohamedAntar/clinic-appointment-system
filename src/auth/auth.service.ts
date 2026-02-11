@@ -26,7 +26,7 @@ export class AuthService {
     const accessToken = await this.jwtService.signAsync(payload);
     const refreshToken = await this.jwtService.signAsync(payload, {
       secret: this.configService.get<string>('REFRESH_JWT_SECRET'),
-      expiresIn: '3600s',
+      expiresIn: '7d',
     });
 
     return {
@@ -75,6 +75,12 @@ export class AuthService {
       accessToken,
       refreshToken,
     };
+  }
+
+  refreshToken(user: any) {
+    const payload = { sub: user.id, email: user.email };
+    const token = this.jwtService.sign(payload);
+    return { accessToken: token };
   }
 
   async validateUser(email: string, pass: string): Promise<any> {
