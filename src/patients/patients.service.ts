@@ -8,6 +8,7 @@ import {
 import { PrismaService } from '../prisma.service.js';
 import { CreatePatientDto } from './dto/createPatientDto.js';
 import { UpdatePatientDto } from './dto/updatePatientDto.js';
+import { PrismaApiFeatures } from '../common/utils/PrismaApiFeatures.js';
 
 //patients.service.ts
 @Injectable()
@@ -78,4 +79,34 @@ export class PatientsService {
       data: data,
     });
   }
+
+  async getOnePatient(id: number, req) {
+    const patient = await this.prismaService.patient.findUnique({
+      where: { id },
+    });
+    if (!patient) {
+      throw new NotFoundException(`No patient found for id ${id}`);
+    }
+
+    //Check if the patient is allowed to update the profile
+    if (req.user.role === 'PATIENT' && patient.userId !== req.user.id) {
+      throw new ForbiddenException('You can only update your own profile');
+    }
+
+    return patient;
+  }
+
+  async getAllPatients(query) {
+    const apiFeature = new PrismaApiFeatures(query, ['fullName']);
+    const options = apiFeature.buildOptions();
+
+    const patients = await this.prismaService.patient.findMany(options);
+    const total = await this.prismaService.patient.count({
+      where: options.where,
+    });
+
+    const paginationInfo = apiFeature.getPaginationInfo(total, patients.length);
+
+    return { paginationInfo, patients };
+  } 
 }

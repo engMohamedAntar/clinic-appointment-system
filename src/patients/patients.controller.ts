@@ -1,10 +1,12 @@
 import {
   Body,
   Controller,
+  Get,
   Param,
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -36,5 +38,18 @@ export class PatientsController {
     @Param('id', ParseIntPipe) id: number,
   ) {
     return await this.patientsService.updatePatient(body, req, id);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('/:id')
+  async getOnePatient(@Param('id', ParseIntPipe) id: number, @Req() req) {
+    return await this.patientsService.getOnePatient(id, req);
+  }
+
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('ADMIN', 'DOCTOR')
+  @Get('/')
+  async getAllPatients(@Query() query) {
+    return await this.patientsService.getAllPatients(query);
   }
 }
