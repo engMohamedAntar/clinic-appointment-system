@@ -8,3 +8,4 @@ import { PrismaService } from '../prisma.service.js';
   providers: [PatientsService, PrismaService]
 })
 export class PatientsModule {}
+ 

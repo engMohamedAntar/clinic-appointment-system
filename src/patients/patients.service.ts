@@ -88,9 +88,9 @@ export class PatientsService {
       throw new NotFoundException(`No patient found for id ${id}`);
     }
 
-    //Check if the patient is allowed to update the profile
+    //Check if the patient is allowed to get this profile
     if (req.user.role === 'PATIENT' && patient.userId !== req.user.id) {
-      throw new ForbiddenException('You can only update your own profile');
+      throw new ForbiddenException('You can only show your own profile');
     }
 
     return patient;
