@@ -47,4 +47,11 @@ export class ScheduleService {
       throw error;
     }
   }
+
+ async getDoctorSchedules(doctorId: number) {
+  return await this.prismaService.schedule.findMany({
+    where: { doctorId },
+  });
+ }
+
 }
