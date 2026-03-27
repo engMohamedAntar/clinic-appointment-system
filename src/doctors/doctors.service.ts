@@ -67,19 +67,22 @@ export class DoctorsService {
   async getOneDoctor(id: number) {
     const doctor = await this.prismaService.doctor.findUnique({
       where: { id },
+      include: { user: true },
     });
     if (!doctor) {
       throw new NotFoundException(`No Doctor found for id ${id}`);
     }
 
-    return doctor;
+    return doctor; 
   }
 
   async getAllDoctors(query) {
     const apiFeature = new PrismaApiFeatures(query, ['fullName', 'specialty']);
     const options = apiFeature.buildOptions();
 
-    const doctors = await this.prismaService.doctor.findMany(options);
+    const doctors = await this.prismaService.doctor.findMany({
+      where: options.where,
+    });
     const total = await this.prismaService.doctor.count({
       where: options.where,
     });

@@ -7,9 +7,10 @@ import { APP_PIPE } from '@nestjs/core';
 import { AuthModule } from './auth/auth.module.js';
 import { PatientsModule } from './patients/patients.module.js';
 import { DoctorsModule } from './doctors/doctors.module.js';
+import { ScheduleModule } from './schedule/schedule.module.js';
 
 @Module({
-  imports: [ConfigModule.forRoot({isGlobal:true}), UsersModule, AuthModule, PatientsModule, DoctorsModule],
+  imports: [ConfigModule.forRoot({isGlobal:true}), UsersModule, AuthModule, PatientsModule, DoctorsModule, ScheduleModule],
   providers: [
     AppService,
     {

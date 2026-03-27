@@ -35,14 +35,15 @@ export class AuthService {
     };
   }
 
-  async login(user) {
+  async login(userId: number) {
+    const user= await this.prismaService.user.findUnique({where: {id: userId}, include: {patient: true, doctor: true} });
     const { accessToken, refreshToken } = await this.generateTokens(user);
     return {
       user: user,
       accessToken,
       refreshToken,
     };
-  }
+  } 
 
   async register(body: RegisterDto) {
     // check if user with email already exists

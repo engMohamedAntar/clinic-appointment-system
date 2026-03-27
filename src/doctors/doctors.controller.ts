@@ -40,11 +40,9 @@ export class DoctorsController {
     return await this.doctorsService.updateDoctor(body, req, id);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt')) 
   @Get('/:id')
   async getOneDoctor(@Param('id', ParseIntPipe) id: number) {
-    console.log('entered the getOneDoctor controller');
-    
     return await this.doctorsService.getOneDoctor(id);
   }
 
