@@ -1,4 +1,5 @@
 import {
+  ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -11,25 +12,39 @@ export class ScheduleService {
   constructor(private prismaService: PrismaService) {}
 
   async createSchedule(user, body: CreateScheduleDto) {
-    //if user.role is DOCTOR check that body.doctorId = user.id
+    // 1. If DOCTOR, verify they own this record
     if (user.role === 'DOCTOR') {
       const loggedInDoctor = await this.prismaService.doctor.findUnique({
         where: { userId: user.id },
       });
 
-      if (!loggedInDoctor)
-        throw new NotFoundException(
-          `No doctor found for user id ${body.doctorId}`,
-        );
-
-      if (body.doctorId !== loggedInDoctor.id)
+      if (!loggedInDoctor || body.doctorId !== loggedInDoctor.id)
         throw new ForbiddenException(
           'You can only create schedules for yourself',
         );
     }
 
-    return await this.prismaService.schedule.create({
-      data: body,
-    });
+    // 2. If ADMIN, at least check if the doctor exists
+    if (user.role === 'ADMIN') {
+      const doctorExists = await this.prismaService.doctor.findUnique({
+        where: { id: body.doctorId },
+      });
+      if (!doctorExists) throw new NotFoundException('Doctor not found');
+    }
+
+    // 3. Attempt creation and handle the "Unique Constraint" (Duplicate Day)
+    try {
+      return await this.prismaService.schedule.create({
+        data: body,
+      });
+    } catch (error) {
+      // Prisma error code for unique constraint violation
+      if (error.code === 'P2002') {
+        throw new ConflictException(
+          'A schedule already exists for this doctor on this day',
+        );
+      }
+      throw error;
+    }
   }
 }
