@@ -36,7 +36,7 @@ export class UsersController {
   async getUserById(@Param('id', ParseIntPipe) id: number) {
     return await this.usersService.getUserById(id);
   }
-
+ 
   @Put('/:id')
   async updateUser(
     @Param('id', ParseIntPipe) id: number,
