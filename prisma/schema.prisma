@@ -67,7 +67,17 @@ model Schedule {
   endTime             String // "13:00"
   slotDurationMinutes Int
   doctor              Doctor @relation(fields: [doctorId], references: [id])
-
+  
   @@unique([doctorId, dayOfWeek]) // This prevents two schedules for the same day
-} 
- 
+}
+
+model Appointment {
+  id        Int      @id @default(autoincrement())
+  patientId Int
+  doctorId  Int
+  startTime DateTime
+  endTime   DateTime
+  status    String   @default("PENDING") // PENDING, CONFIRMED, CANCELLED, COMPLETED
+  reason    String?
+  notes     String?
+}
