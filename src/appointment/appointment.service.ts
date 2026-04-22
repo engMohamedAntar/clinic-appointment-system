@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma.service.js';
 import { CreateAppointmentDto } from './dto/createAppointment.dto.js';
+import { PrismaApiFeatures } from '../common/utils/PrismaApiFeatures.js';
 
 const MAX_ADVANCE_DAYS = 30;
 
@@ -142,4 +143,33 @@ export class AppointmentService {
       });
     });
   }
+
+  async getMyAppointments(query: any, patientId: number) {
+    const apiFeature = new PrismaApiFeatures(query, ['reason', 'notes']);
+
+    const options = apiFeature.buildOptions();
+
+    options.where = {
+      ...options.where,
+      patientId,
+      status: { not: 'CANCELLED' },
+    };
+
+    const total = await this.prismaService.appointment.count({
+      where: options.where,
+    });
+
+    const appointments = await this.prismaService.appointment.findMany(options);
+ 
+    const paginationInfo = apiFeature.getPaginationInfo(
+      total,
+      appointments.length,
+    );
+
+    return {
+      paginationInfo,
+      appointments,
+    };
+  }
+  
 }

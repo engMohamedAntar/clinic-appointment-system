@@ -10,7 +10,7 @@ export class PrismaApiFeatures {
   
   constructor(
     private query: Record<string,any>,
-    private searchFields: string[],
+    private searchFields : string[],
   ) {
     //extract the query
     const { sort, fields, keyword, limit, page, ...filter } = query;
