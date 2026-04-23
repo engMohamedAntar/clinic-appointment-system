@@ -8,6 +8,7 @@ import {
 import { PrismaService } from '../prisma.service.js';
 import { CreateAppointmentDto } from './dto/createAppointment.dto.js';
 import { PrismaApiFeatures } from '../common/utils/PrismaApiFeatures.js';
+import { UpdateAppointmentStatusDto } from './dto/updateAppointmentStatus.dto.js';
 
 const MAX_ADVANCE_DAYS = 30;
 
@@ -180,13 +181,13 @@ export class AppointmentService {
 
     if (!appointment) throw new NotFoundException('Appointment not found');
 
-    if (appointment.patientId !== patientId) 
+    if (appointment.patientId !== patientId)
       throw new ForbiddenException(
         'You are not allowed to cancel this appointment',
       );
 
     // Can't cancel if already cancelled or completed
-    if (appointment.status === 'CANCELLED') 
+    if (appointment.status === 'CANCELLED')
       throw new BadRequestException('This appointment is already cancelled');
     if (appointment.status === 'COMPLETED') {
       throw new BadRequestException('Cannot cancel completed appointment');
@@ -220,19 +221,19 @@ export class AppointmentService {
   async getMyDoctorAppointments(query: any, userId: number) {
     const user = await this.prismaService.user.findUnique({
       where: { id: userId },
-      include: {doctor: true},
+      include: { doctor: true },
     });
     if (!user || !user.doctor) {
       throw new NotFoundException('Doctor profile not found for this user');
     }
-    
+
     const apiFeature = new PrismaApiFeatures(query, ['reason', 'notes']);
 
     const options = apiFeature.buildOptions();
 
     options.where = {
       ...options.where,
-        doctorId: user.doctor.id,
+      doctorId: user.doctor.id,
       status: { not: 'CANCELLED' },
     };
 
@@ -252,4 +253,34 @@ export class AppointmentService {
     };
   }
 
+  async updateAppointmentStatus(
+    id: number,
+    userId: number,
+    dto: UpdateAppointmentStatusDto,
+  ) {
+    const user = await this.prismaService.user.findUnique({
+      where: { id: userId },
+      include: { doctor: true },
+    });
+    if (!user || !user.doctor) {
+      throw new NotFoundException('Doctor profile not found for this user');
+    }
+
+    const appointment = await this.prismaService.appointment.findUnique({
+      where: { id },
+    });
+
+    if (!appointment) throw new NotFoundException('Appointment not found');
+
+    if (appointment.doctorId !== user.doctor.id)
+      throw new ForbiddenException(
+        'You are not allowed to update this appointment',
+      );
+
+    return await this.prismaService.appointment.update({
+      where: { id },
+      data: { status: dto.status },
+    });
+  }
+  
 }
