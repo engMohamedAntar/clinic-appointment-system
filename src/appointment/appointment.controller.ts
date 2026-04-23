@@ -27,6 +27,11 @@ export class AppointmentController {
     cancelAppointment(@Param('id', ParseIntPipe) id: number, @Req() req) {
         return this.appointmentService.cancelAppointment(id, req.user.id);
     }
-
+    
+    @Roles('DOCTOR')
+    @Get('/doctor/my')
+    getMyDoctorAppointments(@Query() query, @Req() req) {
+        return this.appointmentService.getMyDoctorAppointments(query, req.user.id);
+    }
     
 }

@@ -216,4 +216,40 @@ export class AppointmentService {
       data: { status: 'CANCELLED' },
     });
   }
+
+  async getMyDoctorAppointments(query: any, userId: number) {
+    const user = await this.prismaService.user.findUnique({
+      where: { id: userId },
+      include: {doctor: true},
+    });
+    if (!user || !user.doctor) {
+      throw new NotFoundException('Doctor profile not found for this user');
+    }
+    
+    const apiFeature = new PrismaApiFeatures(query, ['reason', 'notes']);
+
+    const options = apiFeature.buildOptions();
+
+    options.where = {
+      ...options.where,
+        doctorId: user.doctor.id,
+      status: { not: 'CANCELLED' },
+    };
+
+    const total = await this.prismaService.appointment.count({
+      where: options.where,
+    });
+
+    const appointments = await this.prismaService.appointment.findMany(options);
+    const paginationInfo = apiFeature.getPaginationInfo(
+      total,
+      appointments.length,
+    );
+
+    return {
+      paginationInfo,
+      appointments,
+    };
+  }
+
 }
