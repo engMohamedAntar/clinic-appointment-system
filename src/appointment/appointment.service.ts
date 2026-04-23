@@ -1,6 +1,7 @@
 // appointment.service.ts
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -160,7 +161,7 @@ export class AppointmentService {
     });
 
     const appointments = await this.prismaService.appointment.findMany(options);
- 
+
     const paginationInfo = apiFeature.getPaginationInfo(
       total,
       appointments.length,
@@ -171,5 +172,48 @@ export class AppointmentService {
       appointments,
     };
   }
-  
+
+  async cancelAppointment(id: number, patientId: number) {
+    const appointment = await this.prismaService.appointment.findUnique({
+      where: { id },
+    });
+
+    if (!appointment) throw new NotFoundException('Appointment not found');
+
+    if (appointment.patientId !== patientId) 
+      throw new ForbiddenException(
+        'You are not allowed to cancel this appointment',
+      );
+
+    // Can't cancel if already cancelled or completed
+    if (appointment.status === 'CANCELLED') 
+      throw new BadRequestException('This appointment is already cancelled');
+    if (appointment.status === 'COMPLETED') {
+      throw new BadRequestException('Cannot cancel completed appointment');
+    }
+
+    // Can't cancel past appointments
+    const now = new Date();
+    if (appointment.startTime <= now) {
+      throw new BadRequestException(
+        'Cannot cancel past or ongoing appointments',
+      );
+    }
+
+    // Must cancel at least 2 hours before appointment
+    const CANCEL_WINDOW_HOURS = 2;
+    const diffInHours =
+      (appointment.startTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+
+    if (diffInHours < CANCEL_WINDOW_HOURS) {
+      throw new BadRequestException(
+        `Cannot cancel less than ${CANCEL_WINDOW_HOURS} hours before appointment`,
+      );
+    }
+
+    return this.prismaService.appointment.update({
+      where: { id },
+      data: { status: 'CANCELLED' },
+    });
+  }
 }
