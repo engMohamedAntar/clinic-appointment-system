@@ -282,5 +282,26 @@ export class AppointmentService {
       data: { status: dto.status },
     });
   }
+
+  async getAllAppointments(query: any) {
+    const apiFeature = new PrismaApiFeatures(query, ['reason', 'notes']);
+
+    const options = apiFeature.buildOptions();
+
+    const total = await this.prismaService.appointment.count({
+      where: options.where,
+    });
+
+    const appointments = await this.prismaService.appointment.findMany(options);
+    const paginationInfo = apiFeature.getPaginationInfo(
+      total,
+      appointments.length,
+    );
+
+    return {
+      paginationInfo,
+      appointments,
+    };
+  }
   
 }

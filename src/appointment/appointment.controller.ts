@@ -1,4 +1,15 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { CreateAppointmentDto } from './dto/createAppointment.dto.js';
 import { AppointmentService } from './appointment.service.js';
 import { AuthGuard } from '@nestjs/passport';
@@ -9,40 +20,59 @@ import { UpdateAppointmentStatusDto } from './dto/updateAppointmentStatus.dto.js
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 @Controller('api/appointment')
 export class AppointmentController {
-    constructor(private readonly appointmentService: AppointmentService) {}
+  constructor(private readonly appointmentService: AppointmentService) {}
 
-    // Patient-specific endpoints
-    @Roles('PATIENT')
-    @Post()
-    createAppointment(@Body() createAppointmentDto: CreateAppointmentDto, @Req() req) {
-        return this.appointmentService.createAppointment(createAppointmentDto, req.user.id);
+  // Patient-specific endpoints
+  @Roles('PATIENT')
+  @Post()
+  createAppointment(
+    @Body() createAppointmentDto: CreateAppointmentDto,
+    @Req() req,
+  ) {
+    return this.appointmentService.createAppointment(
+      createAppointmentDto,
+      req.user.id,
+    );
+  }
+
+  @Roles('PATIENT')
+  @Get('/my')
+  getMyAppointments(@Query() query, @Req() req) {
+    return this.appointmentService.getMyAppointments(query, req.user.id);
+  }
+
+  @Roles('PATIENT')
+  @Patch('/:id/cancel')
+  cancelAppointment(@Param('id', ParseIntPipe) id: number, @Req() req) {
+    return this.appointmentService.cancelAppointment(id, req.user.id);
+  }
+
+  // Doctor-specific endpoints
+  @Roles('DOCTOR')
+  @Get('/doctor/my')
+  getMyDoctorAppointments(@Query() query, @Req() req) {
+    return this.appointmentService.getMyDoctorAppointments(query, req.user.id);
+  }
+
+  @Roles('DOCTOR')
+  @Patch('/:id/status')
+  updateAppointmentStatus(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req,
+    @Body() dto: UpdateAppointmentStatusDto,
+  ) {
+    return this.appointmentService.updateAppointmentStatus(
+      id,
+      req.user.id,
+      dto,
+    );
+  }
+
+  // Admin-specific endpoints
+  @Roles('ADMIN')
+  @Get()
+    getAllAppointments(@Query() query) {
+      return this.appointmentService.getAllAppointments(query);
     }
 
-    @Roles('PATIENT')
-    @Get('/my')
-    getMyAppointments( @Query() query ,@Req() req) {
-        return this.appointmentService.getMyAppointments(query, req.user.id);
-    }
-
-    @Roles('PATIENT')
-    @Patch('/:id/cancel')
-    cancelAppointment(@Param('id', ParseIntPipe) id: number, @Req() req) {
-        return this.appointmentService.cancelAppointment(id, req.user.id);
-    }
-
-    // Doctor-specific endpoints
-    @Roles('DOCTOR')
-    @Get('/doctor/my')
-    getMyDoctorAppointments(@Query() query, @Req() req) {
-        return this.appointmentService.getMyDoctorAppointments(query, req.user.id);
-    }
-
-    @Roles('DOCTOR')
-    @Patch('/:id/status')
-    updateAppointmentStatus(@Param('id', ParseIntPipe) id: number, @Req() req, @Body() dto: UpdateAppointmentStatusDto) {
-        return this.appointmentService.updateAppointmentStatus(id, req.user.id, dto);
-    }
-
-
-    
 }
